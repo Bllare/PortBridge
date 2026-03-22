@@ -1,0 +1,3 @@
+customtkinter
+pygame
+requests
