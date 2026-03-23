@@ -1,7 +1,7 @@
 # PortBridge 🌉
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![GitHub Issues](https://img.shields.io/github/issues/Bllare/PortBridge)](https://github.com/Bllare/PortBridge/issues)
 
 PortBridge is a resilient networking tool that allows gamers to connect to local multiplayer servers during internet disruptions by creating a local relay for game traffic.
@@ -313,4 +313,4 @@ If only internal routes are available:
 
 This project is licensed under the MIT License.
 
-See the LICENSE file for details.
+See the [LICENSE](https://github.com/Bllare/PortBridge/raw/refs/heads/main/LICENSE) file for details.
