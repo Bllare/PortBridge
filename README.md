@@ -16,6 +16,7 @@ PortBridge is a resilient networking tool that allows gamers to connect to local
 - Local relay for game traffic  
 - Steam authentication bypass capability (for games like CS2)  
 - Simple GUI for server and client  
+- Headless server with command-line arguments for Linux servers
 - Lightweight and portable  
 - Works completely inside LAN or internal networks  
 
@@ -46,11 +47,15 @@ git clone https://github.com/Bllare/PortBridge.git
 cd PortBridge
 ```
 
-Install dependencies:
+For the desktop GUI, install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
+
+The headless server requires only Python 3.10+ and its standard library. On a
+Linux server, you can skip installing `requirements.txt`; Tkinter, a desktop
+environment, and a display are not required for command-line mode.
 
 ---
 
@@ -67,10 +72,50 @@ The server acts as a relay between the client and the actual game server.
 
 # Server Setup (راه‌اندازی سرور)
 
-Run the server:
+Run the desktop server GUI:
 
 ```bash
 python run_server.py
+```
+
+### Linux / Headless Server
+
+From the repository directory, run:
+
+```bash
+python3 -u run_server.py --listen-host 0.0.0.0 --listen-port 3000 --target-host 127.0.0.1 --target-port 27015
+```
+
+Supplying any configuration argument starts the server in command-line mode.
+Use `--cli` to start with the default settings, or `--help` to list all options:
+
+```bash
+python3 -u run_server.py --cli
+python3 run_server.py --help
+```
+
+| Argument | Default | Description |
+| --- | --- | --- |
+| `--cli` | Off | Start without a GUI, including when using all defaults |
+| `--listen-host` | `0.0.0.0` | Local IPv4 address or hostname to bind; `0.0.0.0` listens on all IPv4 interfaces |
+| `--listen-port` | `30000` | UDP port for incoming clients |
+| `--target-host` | `127.0.0.1` | Game server IPv4 address or hostname |
+| `--target-port` | `27015` | Game server UDP port |
+
+Ports must be integers between `1` and `65535`. Allow incoming **UDP** traffic
+on the listen port in the server firewall, and configure clients to use the
+server's reachable IP address and that listen port. The example uses `3000`;
+the default when omitted is `30000`.
+
+Logs go to standard output. `-u` makes logs appear immediately when redirected.
+Stop the server with `Ctrl+C` or `SIGTERM` (for example, `kill <pid>`).
+Startup failures, such as an occupied listen port, return a nonzero exit status.
+
+You can also run the relay module directly with the same arguments; this entry
+point always uses command-line mode:
+
+```bash
+python3 -u -m server.server --listen-port 3000 --target-port 27015
 ```
 
 ### Server Configuration

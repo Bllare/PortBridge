@@ -1,3 +1,5 @@
+import argparse
+import signal
 import socket
 import time
 import threading
@@ -91,15 +93,67 @@ class UDPRelay:
         self.log("Relay stopped")
 
 
-if __name__ == "__main__":
+def port_number(value):
+    try:
+        port = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError("port must be an integer between 1 and 65535")
+    if not 1 <= port <= 65535:
+        raise argparse.ArgumentTypeError("port must be between 1 and 65535")
+    return port
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(
+        description="Run the PortBridge UDP relay without a GUI.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument(
+        "--cli", action="store_true", help="run without a GUI using the defaults or supplied options"
+    )
+    parser.add_argument(
+        "--listen-host", default="0.0.0.0", help="local IPv4 address or hostname to bind"
+    )
+    parser.add_argument(
+        "--listen-port", type=port_number, default=30000, help="UDP port for incoming clients"
+    )
+    parser.add_argument(
+        "--target-host", default="127.0.0.1", help="game server IPv4 address or hostname"
+    )
+    parser.add_argument(
+        "--target-port", type=port_number, default=27015, help="game server UDP port"
+    )
+    args = parser.parse_args(argv)
+    # Compare incoming target packets against an IPv4 address, even for hostnames.
+    try:
+        listen_host = socket.gethostbyname(args.listen_host)
+        target_host = socket.gethostbyname(args.target_host)
+    except OSError as exc:
+        parser.error(f"cannot resolve host: {exc}")
+
     relay = UDPRelay(
-        listen_host="0.0.0.0",
-        listen_port=30000,
-        target_host="127.0.0.1",
-        target_port=27015
+        listen_host=listen_host,
+        listen_port=args.listen_port,
+        target_host=target_host,
+        target_port=args.target_port,
     )
 
+    def handle_sigterm(signum, frame):
+        raise KeyboardInterrupt
+
+    previous_sigterm = signal.signal(signal.SIGTERM, handle_sigterm)
     try:
         relay.start()
     except KeyboardInterrupt:
+        pass
+    except OSError:
+        # start() already logs the startup error; return a failure status to the shell.
+        return 1
+    finally:
         relay.stop()
+        signal.signal(signal.SIGTERM, previous_sigterm)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,9 +1,4 @@
-import threading
-import customtkinter as ctk
-from customtkinter import CTk, CTkFrame, CTkLabel, CTkEntry, CTkButton, CTkTextbox
-import webbrowser
-import time
-import re
+from customtkinter import CTkEntry
 
 class PlaceholderEntry(CTkEntry):
     def __init__(self, *args, placeholder_text="", placeholder_color="#a0a0a0", **kwargs):
